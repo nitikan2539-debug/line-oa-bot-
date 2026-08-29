@@ -71,6 +71,21 @@ function matchQuestion(userText) {
 // คำทักทายที่จะให้บอทส่งเมนูต้อนรับ
 const GREETING_WORDS = ["สวัสดี", "hello", "hi", "เมนู", "help", "ช่วยเหลือ"];
 
+// คำขอบคุณ/รับทราบ ที่ไม่ใช่คำถาม -> ไม่ต้องส่ง fallback แบบเป็นทางการ
+// ให้ตอบสั้นๆ แบบเป็นมิตรแทน
+const ACKNOWLEDGMENT_WORDS = [
+  "ขอบคุณ",
+  "ขอบใจ",
+  "ขอบพระคุณ",
+  "รับทราบ",
+  "ทราบแล้ว",
+  "เข้าใจแล้ว",
+  "โอเค",
+  "thank",
+  "thanks",
+  "ok",
+];
+
 async function handleEvent(event) {
   // เพิ่มเพื่อนใหม่ -> ส่งข้อความต้อนรับ + เมนู
   if (event.type === "follow") {
@@ -107,16 +122,28 @@ async function handleEvent(event) {
     });
   }
 
+  // ข้อความขอบคุณ/รับทราบ -> ตอบสั้นๆ แบบเป็นมิตร ไม่ต้องส่ง fallback
+  if (ACKNOWLEDGMENT_WORDS.some((w) => lowerText.includes(w))) {
+    return client.replyMessage({
+      replyToken: event.replyToken,
+      messages: [{ type: "text", text: "ยินดีค่ะ 😊" }],
+    });
+  }
+
   const matched = matchQuestion(userText);
 
-  const replyText = matched ? matched.answer : fallbackMessage;
+  // จับคำถามไม่ได้ -> เงียบไว้ ไม่ต้องส่ง fallback
+  // (กันกรณีคุณแม่พิมพ์ข้อความทั่วไปที่ไม่ใช่คำถามแล้วบอทตอบแปลกๆ)
+  if (!matched) {
+    return Promise.resolve(null);
+  }
 
   return client.replyMessage({
     replyToken: event.replyToken,
     messages: [
       {
         type: "text",
-        text: replyText,
+        text: matched.answer,
         quickReply: buildQuickReply(), // แนบเมนูปุ่มไว้ทุกครั้ง เพื่อให้กดหัวข้อถัดไปได้ง่าย
       },
     ],
