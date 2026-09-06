@@ -98,9 +98,5 @@ const fallbackMessage =
   `😊 ขออภัยค่ะ ระบบไม่พบคำตอบที่ตรงกับคำถามนี้\n` +
   `กรุณาเลือกหัวข้อจากเมนูด้านล่าง หรือติดต่อเจ้าหน้าที่โดยตรงที่ ☎️ ${HOSPITAL_PHONE} ค่ะ`;
 
-// ข้อความต้อนรับเมื่อผู้ใช้พิมพ์ทักทาย / เพิ่มเพื่อนครั้งแรก
-const greetingMessage =
-  "👋 สวัสดีค่ะ 🙏 ยินดีต้อนรับสู่ LINE OA หอผู้ป่วย NS2 Family 👶💕\n" +
-  "กรุณาเลือกหัวข้อที่ต้องการสอบถามได้เลยนะคะ 😊";
 
 module.exports = { qaList, fallbackMessage, greetingMessage, HOSPITAL_PHONE };
