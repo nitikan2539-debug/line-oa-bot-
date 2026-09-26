@@ -6,7 +6,7 @@
 require("dotenv").config();
 const express = require("express");
 const line = require("@line/bot-sdk");
-const { qaList, fallbackMessage, greetingMessage } = require("./qaData");
+const { qaList, fallbackMessage } = require("./qaData");
 
 const config = {
   channelAccessToken: process.env.LINE_CHANNEL_ACCESS_TOKEN,
@@ -68,9 +68,6 @@ function matchQuestion(userText) {
   return null;
 }
 
-// คำทักทายที่จะให้บอทส่งเมนูต้อนรับ
-const GREETING_WORDS = ["สวัสดี", "hello", "hi", "เมนู", "help", "ช่วยเหลือ"];
-
 // คำขอบคุณ/รับทราบ ที่ไม่ใช่คำถาม -> ไม่ต้องส่ง fallback แบบเป็นทางการ
 // ให้ตอบสั้นๆ แบบเป็นมิตรแทน
 const ACKNOWLEDGMENT_WORDS = [
@@ -87,18 +84,9 @@ const ACKNOWLEDGMENT_WORDS = [
 ];
 
 async function handleEvent(event) {
-  // เพิ่มเพื่อนใหม่ -> ส่งข้อความต้อนรับ + เมนู
+  // ไม่ต้องส่งข้อความต้อนรับตอนเพิ่มเพื่อน เพราะ LINE OA ตั้งข้อความต้อนรับของตัวเองไว้แล้ว
   if (event.type === "follow") {
-    return client.pushMessage({
-      to: event.source.userId,
-      messages: [
-        {
-          type: "text",
-          text: greetingMessage,
-          quickReply: buildQuickReply(),
-        },
-      ],
-    });
+    return Promise.resolve(null);
   }
 
   if (event.type !== "message" || event.message.type !== "text") {
@@ -107,20 +95,6 @@ async function handleEvent(event) {
 
   const userText = event.message.text;
   const lowerText = userText.trim().toLowerCase();
-
-  // คำทักทาย -> ส่งเมนู
-  if (GREETING_WORDS.some((w) => lowerText.includes(w))) {
-    return client.replyMessage({
-      replyToken: event.replyToken,
-      messages: [
-        {
-          type: "text",
-          text: greetingMessage,
-          quickReply: buildQuickReply(),
-        },
-      ],
-    });
-  }
 
   // ข้อความขอบคุณ/รับทราบ -> ตอบสั้นๆ แบบเป็นมิตร ไม่ต้องส่ง fallback
   if (ACKNOWLEDGMENT_WORDS.some((w) => lowerText.includes(w))) {
